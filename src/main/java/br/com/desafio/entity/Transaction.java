@@ -117,19 +117,4 @@ public class Transaction implements Serializable {
 			return false;
 		return true;
 	}
-	
-	public static void main(String[] args) {
-		Transaction t = new Transaction();
-		t.setAmount(BigDecimal.TEN);
-		System.out.println(t.containsInvalidAmount());
-		
-		t.setAmount(new BigDecimal("-1"));
-		System.out.println(t.containsInvalidAmount());
-		
-		t.setAmount(new BigDecimal("0"));
-		System.out.println(t.containsInvalidAmount());
-		
-		t.setAmount(null);
-		System.out.println(t.containsInvalidAmount());
-	}
 }
