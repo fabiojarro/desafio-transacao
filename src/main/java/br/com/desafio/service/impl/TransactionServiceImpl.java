@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.desafio.entity.Account;
@@ -43,7 +44,7 @@ public class TransactionServiceImpl implements TransactionService {
 		this.transactionRepository = transactionRepository;
 	}
 	
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRED)
 	public Transaction save(Transaction transaction) {
 		if(transaction.containsInvalidAmount()) {
 			throw new ApiException("Informe um valor positivo.");
