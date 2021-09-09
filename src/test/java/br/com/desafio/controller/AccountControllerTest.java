@@ -1,9 +1,11 @@
 package br.com.desafio.controller;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
 import java.net.URI;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,13 +43,13 @@ public class AccountControllerTest {
 	@DisplayName("Deveria receber um erro quando o documento já existir")
 	public void testShouldReceiveAnErrorWhenDocumentExists() throws JSONException {
 		JSONObject json = new JSONObject();
-		json.put("document_number", 1000L);
+		json.put("document_number", "1000");
 		
 		ResponseEntity<Account> responsePost = restTemplate.exchange(getUri("/accounts"), HttpMethod.POST, new HttpEntity<String>(json.toString(), headers), Account.class);
 		Account account = responsePost.getBody();
 		
 		assertThat(responsePost.getStatusCode(), is(HttpStatus.CREATED));
-		assertThat(account.getDocument(), is(1000L));
+		assertThat(account.getDocument(), is("1000"));
 
 		ResponseEntity<ErrorMessage> otherResponsePost = restTemplate.exchange(getUri("/accounts"), HttpMethod.POST, new HttpEntity<String>(json.toString(), headers), ErrorMessage.class);
 		ErrorMessage errorMessage = otherResponsePost.getBody();
@@ -73,21 +75,23 @@ public class AccountControllerTest {
 	@DisplayName("Deveria criar uma conta")
 	public void testShouldCreateAnAccount() throws JSONException {
 		JSONObject json = new JSONObject();
-		json.put("document_number", 12345678900L);
+		json.put("document_number", "12345678900");
+		json.put("available_credit_limit", 500.54);
 		
 		ResponseEntity<Account> response = restTemplate.exchange(getUri("/accounts"), HttpMethod.POST, new HttpEntity<String>(json.toString(), headers), Account.class);
 		Account account = response.getBody();
 		
 		assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
 		assertThat(account.getId(), is(notNullValue()));
-		assertThat(account.getDocument(), is(12345678900L));
+		assertThat(account.getDocument(), is("12345678900"));
+		assertThat(account.getAvailableCreditLimit().doubleValue(), is(500.54));
 	}
 	
 	@Test
 	@DisplayName("Deveria obter uma conta")
 	public void testShouldGetAnAccount() throws JSONException {
 		JSONObject json = new JSONObject();
-		json.put("document_number", 200L);
+		json.put("document_number", "200");
 		
 		ResponseEntity<Account> responsePost = restTemplate.exchange(getUri("/accounts"), HttpMethod.POST, new HttpEntity<String>(json.toString(), headers), Account.class);
 		Account accountCreated = responsePost.getBody();
@@ -99,7 +103,8 @@ public class AccountControllerTest {
 		
 		assertThat(responseGet.getStatusCode(), is(HttpStatus.OK));
 		assertThat(account.getId(), is(accountCreated.getId()));
-		assertThat(account.getDocument(), is(200L));
+		assertThat(account.getDocument(), is("200"));
+		assertThat(account.getAvailableCreditLimit().intValue(), is(0));
 	}
 	
 	@Test

@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RestController
 @RequestMapping("/accounts")
 public class AccountController {
-
+	
 	private AccountService accountService;
 	
 	@Autowired

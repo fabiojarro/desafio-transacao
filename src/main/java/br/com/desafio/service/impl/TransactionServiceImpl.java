@@ -2,8 +2,11 @@ package br.com.desafio.service.impl;
 
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.com.desafio.entity.Account;
 import br.com.desafio.entity.OperationType;
@@ -17,6 +20,8 @@ import br.com.desafio.service.TransactionService;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
+	private Logger logger = LoggerFactory.getLogger(getClass());
+	
 	private OperationTypeService operationTypeService;
 	
 	private AccountService accountService;
@@ -38,17 +43,26 @@ public class TransactionServiceImpl implements TransactionService {
 		this.transactionRepository = transactionRepository;
 	}
 	
+	@Transactional
 	public Transaction save(Transaction transaction) {
 		if(transaction.containsInvalidAmount()) {
 			throw new ApiException("Informe um valor positivo.");
 		}
 		
 		Account account = getAccount(transaction);
-		transaction.setAccount(account);	
+		transaction.setAccount(account);
+		logger.info("A conta informada é válida");
 		
 		OperationType operationType = getOperation(transaction);
 		transaction.setOperationType(operationType);
+		logger.info("A operação é válida");
 		
+		if(operationType.isDebt() && account.hasNotLimitCreditToDebit(transaction.getAmount())) {
+			throw new ApiException("A conta não tem limite");
+		}
+		logger.info("A conta possui saldo para realizar a operação!");
+		
+		account.applyOperation(operationType, transaction.getAmount());
 		transaction.updateAmountByOperation();
 		transaction.setEventDate(new Date());
 		transaction = transactionRepository.save(transaction);

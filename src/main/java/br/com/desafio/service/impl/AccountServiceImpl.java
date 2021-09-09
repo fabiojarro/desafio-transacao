@@ -30,7 +30,7 @@ public class AccountServiceImpl implements AccountService {
 
 	public Account save(Account account) {
 		
-		if(account.getDocument() == null) {
+		if(account.getDocument() == null || account.getDocument().length() < 1) {
 			throw new ApiException("O número do documento deve ser informado.");
 		}
 

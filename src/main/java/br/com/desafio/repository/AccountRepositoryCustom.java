@@ -4,6 +4,6 @@ import br.com.desafio.entity.Account;
 
 public interface AccountRepositoryCustom {
 
-	public Account getByDocument(Long document);
+	public Account getByDocument(String document);
 	
 }

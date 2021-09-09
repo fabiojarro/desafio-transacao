@@ -1,6 +1,7 @@
 package br.com.desafio.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +23,14 @@ public class Account implements Serializable{
 	private Integer id;
 	
 	@Column(name = "DOCUMENT_NUMBER", unique = true)
-	private Long document;
+	private String document;
+	
+	@Column(name = "AVAILABLE_CREDIT_LIMIT")
+	private BigDecimal availableCreditLimit;
+
+	public Account() {
+		this.availableCreditLimit = BigDecimal.ZERO;
+	}
 
 	@JsonProperty("account_id")
 	public Integer getId() {
@@ -34,12 +42,50 @@ public class Account implements Serializable{
 	}
 
 	@JsonProperty("document_number")
-	public Long getDocument() {
+	public String getDocument() {
 		return document;
 	}
 
-	public void setDocument(Long document) {
+	public void setDocument(String document) {
 		this.document = document;
+	}
+
+	public BigDecimal getAvailableCreditLimit() {
+		return availableCreditLimit;
+	}
+
+	public void setAvailableCreditLimit(BigDecimal availableCreditLimit) {
+		this.availableCreditLimit = availableCreditLimit;
+	}
+	
+	public boolean isCreditLimitPositive() {
+		return getAvailableCreditLimit() != null && getAvailableCreditLimit().compareTo(BigDecimal.ZERO) > 0;
+	}
+	
+	public boolean isCreditLimitUnavailble() {
+		return !isCreditLimitPositive();
+	}
+	
+	public boolean hasLimitCreditToDebit(BigDecimal amount) {
+		if(isCreditLimitPositive()) {
+			return getAvailableCreditLimit().compareTo(amount) > -1;
+		}
+		return false;
+	}
+	
+	public boolean hasNotLimitCreditToDebit(BigDecimal amount) {
+		return !hasLimitCreditToDebit(amount);
+	}
+	
+	public void applyOperation(OperationType operationType, BigDecimal amount) {
+		if(!operationType.isDebt()) {
+			setAvailableCreditLimit(getAvailableCreditLimit().add(amount));
+			return;
+		}
+		
+		if(hasLimitCreditToDebit(amount) && operationType.isDebt()) {
+			setAvailableCreditLimit(getAvailableCreditLimit().subtract(amount));
+		}
 	}
 
 	@Override
@@ -66,5 +112,4 @@ public class Account implements Serializable{
 			return false;
 		return true;
 	}
-
 }

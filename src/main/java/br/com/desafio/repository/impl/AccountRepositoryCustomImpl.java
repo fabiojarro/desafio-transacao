@@ -17,7 +17,7 @@ public class AccountRepositoryCustomImpl implements AccountRepositoryCustom {
     private EntityManager entityManager;
 	
 	@Override
-	public Account getByDocument(Long document) {
+	public Account getByDocument(String document) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Account> query = builder.createQuery(Account.class);
         Root<Account> root = query.from(Account.class);
